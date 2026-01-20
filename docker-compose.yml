@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: .
+    container_name: cactustv-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - cactus-net
+
+  backend:
+    build: ./backend
+    container_name: cactustv-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./media:/media
+      - ./config:/app/config
+      - ./temp:/app/temp
+    environment:
+      # Hardware Acceleration Strategy
+      # Options: 'cpu' (Default), 'cuda' (NVIDIA), 'qsv' (Intel), 'vaapi' (Intel/AMD)
+      - FFMPEG_HWACCEL=cpu
+    
+    # --- Hardware Configuration (Uncomment based on your hardware) ---
+    
+    # 1. INTEL / AMD (VAAPI/QSV)
+    # devices:
+    #   - /dev/dri:/dev/dri
+
+    # 2. NVIDIA (NVENC)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+    networks:
+      - cactus-net
+
+networks:
+  cactus-net:
+    driver: bridge
